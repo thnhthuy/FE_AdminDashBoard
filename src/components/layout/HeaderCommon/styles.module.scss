@@ -1,0 +1,15 @@
+@import "@styles/_mixins.module.scss";
+@import "@styles/_variables.module.scss";
+
+.container {
+  @include flex_box_custom(space-between, center, 10px);
+  .title {
+    h2 {
+      margin: 0 0 10px 0;
+    }
+    p {
+      color: $thr_color;
+      margin: 0;
+    }
+  }
+}
