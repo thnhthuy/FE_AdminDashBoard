@@ -1,13 +1,27 @@
 import { CiSearch } from "react-icons/ci";
 import styles from "./styles.module.scss";
-function Input({ content }) {
-  const { search, iconSearch } = styles;
+import classNames from "classnames";
+
+function Input({ showIcon = false, icon = <CiSearch />, ...props }) {
+  const { search, iconSearch, appear, hidden, hasIcon } = styles;
+
   return (
     <div className={search}>
-      <div className={iconSearch}>
-        <CiSearch />
+      <div
+        className={classNames(iconSearch, {
+          [appear]: showIcon,
+          [hidden]: !showIcon,
+        })}
+      >
+        {icon}
       </div>
-      <input type="text" placeholder={content} />
+
+      <input
+        className={classNames({
+          [hasIcon]: showIcon,
+        })}
+        {...props}
+      />
     </div>
   );
 }

@@ -1,0 +1,99 @@
+.popUpWrapper {
+  position: relative;
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #0000004d;
+    z-index: 1000;
+    transition: all 0.3 ease;
+  }
+
+  .popUpStyle {
+    position: fixed;
+    padding: 20px;
+    background-color: #fff;
+    z-index: 1001;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 20px;
+    animation: slideDown 0.4s ease-in-out forwards;
+    min-width: 400px;
+    overflow-y: auto;
+    max-height: 80vh;
+  }
+
+  .slidePopUp {
+    animation: slideDown 0.3s ease forwards;
+  }
+
+  @keyframes slideDown {
+    0% {
+      transform: translate(-50%, -70%);
+      opacity: 0;
+    }
+    100% {
+      transform: translate(-50%, -50%);
+      opacity: 1;
+    }
+  }
+  @keyframes slideUp {
+    0% {
+      transform: translate(-50%, -50%);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -70%);
+      opacity: 0;
+    }
+  }
+
+  .popUpTitle {
+    margin-bottom: 20px;
+    h4 {
+      margin: 0;
+    }
+    p {
+      margin: 10px 0 0 0;
+      color: #555;
+    }
+
+    .iconClose {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 20px;
+      color: #333;
+      cursor: pointer;
+      &:hover {
+        color: #000;
+      }
+    }
+  }
+
+  //   .popUpcontent {
+  //     display: grid;
+  //     gap: 1rem;
+
+  //     .gridCols2 {
+  //       display: grid;
+  //       grid-template-columns: repeat(2, 1fr);
+  //       gap: 15px;
+  //     }
+  //     .spaceY2 {
+  //       display: flex;
+  //       flex-direction: column;
+  //       gap: 5px;
+  //     }
+  //   }
+
+  .popUpBottom {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 40px;
+  }
+}

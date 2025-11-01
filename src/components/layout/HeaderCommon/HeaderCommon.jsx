@@ -4,7 +4,7 @@ import { useContext } from "react";
 import { SideBarContext } from "@/contexts/SideBarContext";
 import { dataHeaderCommon } from "./constans";
 
-function HeaderCommon({ showAddButton = false }) {
+function HeaderCommon({ showAddButton = false, onClick }) {
   const { container, title } = styles;
 
   const { type } = useContext(SideBarContext);
@@ -27,6 +27,7 @@ function HeaderCommon({ showAddButton = false }) {
         <Button
           content={type === "Users" ? "Add User" : "Add Product"}
           showIcon={true}
+          onClick={onClick}
         />
       )}
     </div>

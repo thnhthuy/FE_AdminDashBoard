@@ -7,11 +7,13 @@ function Button({
   isPrimary = true,
   btnActive = false,
   onClick,
+  onChange,
 }) {
   const { btn, appear, hidden, primaryBtn, secondaryBtn, btnItemActive } =
     styles;
   return (
     <button
+      onChange={onChange}
       onClick={onClick}
       className={classNames(btn, {
         [primaryBtn]: isPrimary,

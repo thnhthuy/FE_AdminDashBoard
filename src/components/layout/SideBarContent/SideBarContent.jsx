@@ -1,20 +1,23 @@
-import classNames from "classnames";
-import styles from "./styles.module.scss";
+// import { NavLink } from "react-router-dom";
+// import styles from "./styles.module.scss";
+// import classNames from "classnames";
 
-function SideBarContent({ content, icon, onclick, active }) {
-  const { container, iconSideBar, text, nav, activeStyle } = styles;
+// function SideBarContent({ content, icon, to }) {
+//   const { container, iconSideBar, text, nav, activeStyle } = styles;
 
-  return (
-    <div className={container}>
-      <div
-        className={classNames(nav, { [activeStyle]: active })}
-        onClick={onclick}
-      >
-        <div className={iconSideBar}>{icon}</div>
-        <div className={text}>{content}</div>
-      </div>
-    </div>
-  );
-}
+//   return (
+//     <div className={container}>
+//       <NavLink
+//         to={to}
+//         className={({ isActive }) =>
+//           classNames(nav, { [activeStyle]: isActive })
+//         }
+//       >
+//         <div className={iconSideBar}>{icon}</div>
+//         <div className={text}>{content}</div>
+//       </NavLink>
+//     </div>
+//   );
+// }
 
-export default SideBarContent;
+// export default SideBarContent;

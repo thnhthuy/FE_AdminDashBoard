@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { lazy } from "react";
 
 const routers = [
   {
@@ -6,28 +6,32 @@ const routers = [
     Component: lazy(() => import("@pages/Dashboard/Dashboard")),
   },
   {
-    path: "/Users",
+    path: "/users",
     Component: lazy(() => import("@pages/Users/Users")),
   },
   {
-    path: "/Products",
+    path: "/products",
     Component: lazy(() => import("@pages/Products/Products")),
   },
   {
-    path: "/Messages",
+    path: "/messages",
     Component: lazy(() => import("@pages/Messages/Messages")),
   },
   {
-    path: "/Notifications",
+    path: "/notifications",
     Component: lazy(() => import("@pages/Notifications/Notifications")),
   },
   {
-    path: "/Reports",
+    path: "/reports",
     Component: lazy(() => import("@pages/Reports/Reports")),
   },
   {
-    path: "/AdminInfo",
+    path: "/admin-info",
     Component: lazy(() => import("@pages/AdminInfo/AdminInfo")),
+  },
+  {
+    path: "/order",
+    Component: lazy(() => import("@pages/Order/Order")),
   },
 ];
 

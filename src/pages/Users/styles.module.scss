@@ -2,20 +2,17 @@
 @import "@styles/_variables.module.scss";
 
 .container {
-  display: flex;
-  flex-direction: column;
+  //   @include flex_box_custom(space-between, center, 10px);
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    .title {
-      h2 {
-        margin: 0 0 10px 0;
-      }
-      p {
-        color: $thr_color;
-        margin: 0;
-      }
+    h2 {
+      margin: 0 0 10px 0;
+    }
+    p {
+      color: $thr_color;
+      margin: 0;
     }
   }
 }
@@ -29,59 +26,6 @@
     color: #555;
   }
 }
-
-.table {
-  border: 0.5px solid #ccc;
-  border-radius: 10px;
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  overflow: visible;
-  text-align: center;
-  th,
-  td {
-    height: 40px;
-    border-bottom: 0.5px solid #ccc;
-  }
-  td {
-    img {
-      max-width: 50px;
-      max-height: 50px;
-      object-fit: cover;
-    }
-  }
-
-  tr {
-    align-items: center;
-    &:hover {
-      background-color: #efefef;
-    }
-  }
-
-  button {
-    background-color: transparent;
-    border: none;
-    color: #111;
-    padding: 5px;
-    &:hover {
-      background-color: #ddd;
-    }
-  }
-}
-
-.containerlstBtn {
-  display: flex;
-  margin-top: 10px;
-  .lstBtn {
-    background-color: #e1e1e1;
-    display: flex;
-    align-items: center;
-    border-radius: 20px;
-    overflow: hidden;
-    gap: 5px;
-  }
-}
-
 .findContainer {
   display: flex;
   margin: 10px 0;
@@ -145,21 +89,53 @@
   }
 }
 
-//popUp styles
-.popUpcontent {
-  display: grid;
-  gap: 1rem;
-
-  .gridCols2 {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+.table {
+  border: 0.5px solid #ccc;
+  border-radius: 10px;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: visible;
+  text-align: center;
+  th,
+  td {
+    height: 40px;
+    border-bottom: 0.5px solid #ccc;
   }
+  //   td {
+  //     img {
+  //       max-width: 50px;
+  //       max-height: 50px;
+  //       object-fit: cover;
+  //     }
+  //   }
+
+  tr {
+    align-items: center;
+    &:hover {
+      background-color: #efefef;
+    }
+  }
+
+  button {
+    background-color: transparent;
+    border: none;
+    color: #111;
+    padding: 5px;
+    &:hover {
+      background-color: #ddd;
+    }
+  }
+}
+
+.popUpContent {
+  margin-top: 30px;
   .spaceY2 {
     position: relative;
     display: flex;
     flex-direction: column;
     gap: 5px;
+    margin-top: 20px;
     .options,
     button {
       width: 100%;
@@ -209,23 +185,4 @@
       }
     }
   }
-}
-// img preview styles
-.preview {
-  margin-top: 10px;
-
-  img {
-    max-width: 150px;
-    max-height: 200px;
-    border-radius: 10px;
-    object-fit: cover;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-  }
-}
-// information container styles
-.containerInformation {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-  margin: 20px 0 20px 0;
 }

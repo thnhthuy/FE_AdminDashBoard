@@ -5,13 +5,22 @@ import { MdOutlineDashboard, MdProductionQuantityLimits } from "react-icons/md";
 import { TbReportOff } from "react-icons/tb";
 
 const navigation = [
-  { content: "Dashboard", icon: <MdOutlineDashboard /> },
-  { content: "Users", icon: <FiUsers /> },
-  { content: "Products", icon: <MdProductionQuantityLimits /> },
-  { content: "Messages", icon: <AiOutlineMessage /> },
-  { content: "Notifications", icon: <IoMdNotificationsOutline /> },
-  { content: "Reports", icon: <TbReportOff /> },
-  { content: "AdminInfo", icon: <MdOutlineDashboard /> },
+  { path: "/", content: "Dashboard", icon: <MdOutlineDashboard /> },
+  { path: "/users", content: "Users", icon: <FiUsers /> },
+  {
+    path: "/products",
+    content: "Products",
+    icon: <MdProductionQuantityLimits />,
+  },
+  { path: "/order", content: "Order", icon: <MdOutlineDashboard /> },
+  { path: "/messages", content: "Messages", icon: <AiOutlineMessage /> },
+  {
+    path: "/notifications",
+    content: "Notifications",
+    icon: <IoMdNotificationsOutline />,
+  },
+  { path: "/reports", content: "Reports", icon: <TbReportOff /> },
+  { path: "/admin-info", content: "AdminInfo", icon: <MdOutlineDashboard /> },
 ];
 
 export default navigation;
