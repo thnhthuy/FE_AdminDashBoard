@@ -6,12 +6,11 @@ import dataCard from "./constants";
 import styles from "./styles.module.scss";
 import Input from "@ui/Input/Input";
 import classNames from "classnames";
-function Card({ children }) {
-  const { type } = useContext(SideBarContext);
+function Card({ className, children }) {
   const { container } = styles;
   // const cardData = dataCard.find((item) => item.type === type.toLowerCase());
 
-  return <div className={container}>{children}</div>;
+  return <div className={classNames(container, className)}>{children}</div>;
 }
 
 export default Card;

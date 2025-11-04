@@ -41,9 +41,29 @@ function Products() {
     uploadBtn,
     containerInformation,
     imgProduct,
+    required,
   } = styles;
 
   const { toast } = useContext(ToastContext);
+
+  const initialFormData = {
+    id: "",
+    name: "",
+    category: "Select category",
+    price: "",
+    inventory: "",
+    colors: "",
+    sizes: "",
+    img: null,
+  };
+
+  const [submitted, setSubmitted] = useState(false);
+
+  const getRequiredClass = (field) => {
+    return submitted && !formData[field] ? styles.required : "";
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
 
   // popup
   const popupCategories = ["Jeans", "Shirt", "Shoes"];
@@ -52,6 +72,30 @@ function Products() {
   const [selectedProduct, setSelectedProduct] = useState(null); // sản phẩm đang chỉnh sửa
 
   const [products, setProducts] = useState(productData); // thay vì dùng dữ liệu tĩnh trực tiếp products
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // add product
+  const handleAddProduct = (newProduct) => {
+    setProducts((prev) => [...prev, newProduct]);
+    toast.success("Product added successfully!");
+    setIsPopUp(false);
+  };
+  // edit product
+  const handleEditProduct = (updatedProduct) => {
+    setProducts((prev) =>
+      prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
+    );
+    toast.success("Product updated successfully!");
+    setIsPopUp(false);
+  };
+
   // delete product
   const handleDeleteProduct = (productId) => {
     const confirmed = window.confirm(
@@ -65,27 +109,130 @@ function Products() {
     setProducts(updatedProducts);
     toast.success(`Product ${productId} deleted successfully!`);
   };
-  const handletoOpenPopup = () => {
-    setPopupMode("add");
-    setSelectedProduct(null);
-    setIsPopUp(true);
-  };
-  const handletoEditPopup = (product) => {
-    setPopupMode("edit");
-    setSelectedProduct(product);
-    setPopUpCategory(product.category);
-    setImgPreview(product.img || null);
+  // open popup
+  // const handletoOpenPopup = () => {
+  //   setPopupMode("add");
+  //   setSelectedProduct(null);
+  //   setFormData({
+  //     id: `T${Math.floor(Math.random() * 1000)}`,
+  //     name: "",
+  //     category: "Select category",
+  //     price: 0,
+  //     inventory: 0,
+  //     colors: "",
+  //     sizes: "",
+  //     img: null,
+  //   });
+  //   setImgPreview(null);
+  //   setIsPopUp(true);
+  // };
+
+  // open add popup
+  const handleOpenAddPopup = () => {
+    setFormData({
+      ...initialFormData,
+      id: products.length + 1,
+    });
+    setSubmitted(false);
     setIsPopUp(true);
   };
 
+  // open edit popup
+  const handletoEditPopup = (product) => {
+    setPopupMode("edit");
+    setSelectedProduct(product);
+    setFormData({
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      price: parseFloat(product.priceOriginal.replace(/[^0-9.]/g, "")) || "",
+      inventory: product.inventory,
+      colors: product.colors.join(", "),
+      sizes: product.sizes.join(", "),
+      img: product.img,
+    });
+    setImgPreview(product.img || null);
+    setIsPopUp(true);
+  };
+  // close popup
+
   const handletoClosePopup = () => {
+    setFormData(initialFormData);
+    setErrors({});
+    setSubmitted(false);
     setIsPopUp(false);
-    setPopUpCategory("Select category");
     setImgPreview(null);
   };
+
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    const newErrors = {};
+    let firstToastShown = false;
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Product name is required!";
+      if (!firstToastShown) {
+        toast.error(newErrors.name);
+        firstToastShown = true;
+      }
+    }
+
+    if (formData.category === "Select category") {
+      newErrors.category = "Please select a category!";
+      if (!firstToastShown) {
+        toast.error(newErrors.category);
+        firstToastShown = true;
+      }
+    }
+
+    if (!formData.colors.trim()) {
+      newErrors.colors = "Please enter at least one color!";
+      if (!firstToastShown) {
+        toast.error(newErrors.colors);
+        firstToastShown = true;
+      }
+    }
+
+    if (!formData.sizes.trim()) {
+      newErrors.sizes = "Please enter at least one size!";
+      if (!firstToastShown) {
+        toast.error(newErrors.sizes);
+        firstToastShown = true;
+      }
+    }
+
+    if (formData.price <= 0) {
+      newErrors.price = "Price must be greater than 0!";
+      if (!firstToastShown) {
+        toast.error(newErrors.price);
+        firstToastShown = true;
+      }
+    }
+
+    if (formData.inventory < 0) {
+      newErrors.inventory = "Inventory cannot be negative!";
+      if (!firstToastShown) {
+        toast.error(newErrors.inventory);
+        firstToastShown = true;
+      }
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      const firstErrorKey = Object.keys(newErrors)[0];
+      const inputEl = document.querySelector(`input[name="${firstErrorKey}"]`);
+      if (inputEl) inputEl.focus();
+      return false;
+    }
+
+    return true;
+  };
+
   const popUpCategoryRef = useRef(null);
   useClickOutside(popUpCategoryRef, () => setPopUpDropdownOpen(false));
-  const [popUpCategory, setPopUpCategory] = useState("Select category");
+  // const [popUpCategory, setPopUpCategory] = useState("Select category");
   const [popUpDropdownOpen, setPopUpDropdownOpen] = useState(false);
 
   // action menu
@@ -148,8 +295,9 @@ function Products() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (imgPreview) URL.revokeObjectURL(imgPreview); //giải phóng URL cũ
-      setImgPreview(URL.createObjectURL(file));
+      const url = URL.createObjectURL(file);
+      setImgPreview(url);
+      setFormData({ ...formData, img: url });
     }
   };
 
@@ -212,7 +360,7 @@ function Products() {
         <Button
           showIcon={true}
           content="Add Product"
-          onClick={handletoOpenPopup}
+          onClick={handleOpenAddPopup}
         />
       </div>
 
@@ -296,10 +444,28 @@ function Products() {
                       </td>
                       <td>{product.category}</td>
                       <td>
-                        <button>{product.colors[2]}</button>
+                        {Array.isArray(product.colors) &&
+                        product.colors.length > 0 ? (
+                          product.colors.map((c, idx) => (
+                            <button key={idx} style={{ marginRight: 6 }}>
+                              {c}
+                            </button>
+                          ))
+                        ) : (
+                          <span>-</span>
+                        )}
                       </td>
                       <td>
-                        <button>{product.sizes[0]}</button>
+                        {Array.isArray(product.sizes) &&
+                        product.sizes.length > 0 ? (
+                          product.sizes.map((s, idx) => (
+                            <button key={idx} style={{ marginRight: 6 }}>
+                              {s}
+                            </button>
+                          ))
+                        ) : (
+                          <span>-</span>
+                        )}
                       </td>
                       <td>{product.priceOriginal}</td>
                       <td>{product.inventory}</td>
@@ -345,11 +511,36 @@ function Products() {
             }
             confirmText={popupMode === "add" ? "Add Product" : "Save Changes"}
             onConfirm={() => {
+              setSubmitted(true);
+              if (!validateForm()) return;
+
+              const newProduct = {
+                id: popupMode === "add" ? products.length + 1 : formData.id,
+                name: formData.name,
+                priceOriginal: `$${Number(formData.price).toFixed(2)}`,
+                inventory: Number(formData.inventory),
+                colors: formData.colors
+                  .split(",")
+                  .map((c) => c.trim().toLowerCase()),
+                sizes: formData.sizes
+                  .split(",")
+                  .map((s) => s.trim().toUpperCase()),
+                img: formData.img || imgPreview || selectedProduct?.img || "",
+                category: formData.category,
+                status:
+                  formData.inventory === 0
+                    ? "Out of stock"
+                    : formData.inventory <= 50
+                    ? "Low stock"
+                    : "In stock",
+              };
+
               if (popupMode === "add") {
-                toast.success("Product added successfully!");
+                handleAddProduct(newProduct);
               } else {
-                toast.info("Product updated successfully!");
+                handleEditProduct(newProduct);
               }
+
               setIsPopUp(false);
             }}
           >
@@ -360,30 +551,42 @@ function Products() {
                   <Input
                     type="text"
                     placeholder="EX: T001"
-                    defaultValue={selectedProduct?.id || ""}
+                    value={formData.id}
                     disabled={popupMode === "edit"}
                   />
                 </div>
                 <div className={spaceY2}>
-                  <label>Product Name</label>
+                  <div>
+                    <label>
+                      Product Name{" "}
+                      <span className={getRequiredClass("name")}>*</span>
+                    </label>
+                  </div>
                   <Input
                     placeholder="Enter product name..."
                     type="text"
-                    defaultValue={selectedProduct?.name || ""}
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
                   />
                 </div>
               </div>
 
               <div className={gridCols2}>
                 <div className={spaceY2}>
-                  <label>Category</label>
+                  <div>
+                    <label>
+                      Category{" "}
+                      <span className={getRequiredClass("category")}>*</span>
+                    </label>
+                  </div>
                   <div
                     className={dropdown}
                     onClick={() => setPopUpDropdownOpen(!popUpDropdownOpen)}
                   >
                     <Button
                       styles={{ width: "100%" }}
-                      content={popUpCategory}
+                      content={formData.category}
                       isPrimary={false}
                     />
                     <span>
@@ -396,7 +599,7 @@ function Products() {
                           <div
                             key={option}
                             onClick={() => (
-                              setPopUpCategory(option),
+                              setFormData({ ...formData, category: option }),
                               setPopUpDropdownOpen(false)
                             )}
                           >
@@ -409,37 +612,64 @@ function Products() {
                 </div>
 
                 <div className={spaceY2}>
-                  <label>Price</label>
+                  <div>
+                    <label>
+                      Price <span className={getRequiredClass("price")}>*</span>
+                    </label>
+                  </div>
                   <Input
                     placeholder="0"
-                    type="text"
-                    defaultValue={selectedProduct?.priceOriginal || ""}
+                    type="number"
+                    name="price"
+                    min="0"
+                    value={formData.price}
+                    onChange={handleInputChange}
                   />
                 </div>
               </div>
 
               <div className={spaceY2}>
-                <label>Inventory</label>
+                <div>
+                  <label>
+                    Inventory{" "}
+                    <span className={getRequiredClass("inventory")}>*</span>
+                  </label>
+                </div>
                 <Input
                   placeholder="0"
-                  type="text"
-                  defaultValue={selectedProduct?.inventory || ""}
+                  type="number"
+                  name="inventory"
+                  min="0"
+                  value={formData.inventory}
+                  onChange={handleInputChange}
                 />
               </div>
               <div className={spaceY2}>
-                <label>Colors</label>
+                <div>
+                  <label>
+                    Colors <span className={getRequiredClass("colors")}>*</span>
+                  </label>
+                </div>
                 <Input
                   placeholder="EX: Red, Blue, Green (separated by commas)"
                   type="text"
-                  defaultValue={selectedProduct?.colors?.join(", ") || ""}
+                  name="colors"
+                  value={formData.colors}
+                  onChange={handleInputChange}
                 />
               </div>
               <div className={spaceY2}>
-                <label>Sizes</label>
+                <div>
+                  <label>
+                    Sizes <span className={getRequiredClass("sizes")}>*</span>
+                  </label>
+                </div>
                 <Input
                   placeholder="EX: S, M, L (separated by commas)"
                   type="text"
-                  defaultValue={selectedProduct?.sizes?.join(", ") || ""}
+                  name="sizes"
+                  value={formData.sizes}
+                  onChange={handleInputChange}
                 />
               </div>
 

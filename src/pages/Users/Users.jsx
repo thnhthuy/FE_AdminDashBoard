@@ -29,19 +29,85 @@ function Users() {
 
   const { toast } = useContext(ToastContext);
 
+  const initialFormData = {
+    id: "",
+    name: "",
+    email: "",
+    role: "Select Role",
+    status: "Select Status",
+  };
+
+  const [submitted, setSubmitted] = useState(false);
+  const getRequiredClass = (field) => {
+    return submitted && !formData[field] ? styles.required : "";
+  };
+  const [formData, setFormData] = useState(initialFormData);
+
+  const [errors, setErrors] = useState({});
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    let firstToastShown = false;
+    if (!formData.name.trim()) {
+      newErrors.name = "User name is required";
+      if (!firstToastShown) {
+        toast.error(newErrors.name);
+        firstToastShown = true;
+      }
+    }
+    // if (!formData.email.trim()) {
+    //   newErrors.email = "Email is required";
+    //   if (!firstToastShown) {
+    //     toast.error(newErrors.email);
+    //     firstToastShown = true;
+    //   }
+    // }
+    if (formData.role === "Select Role") {
+      newErrors.role = "Role is required";
+      if (!firstToastShown) {
+        toast.error(newErrors.role);
+        firstToastShown = true;
+      }
+    }
+    if (formData.status === "Select Status") {
+      newErrors.status = "Status is required";
+      if (!firstToastShown) {
+        toast.error(newErrors.status);
+        firstToastShown = true;
+      }
+    }
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      const firstErrorKey = Object.keys(newErrors)[0];
+      const inputEl = document.querySelector(`input[name="${firstErrorKey}"]`);
+      if (inputEl) inputEl.focus();
+      return false;
+    }
+
+    return true;
+  };
+
   const [isOpenId, setIsOpenId] = useState(null); //action Menu
 
   const [isPopUpOpen, setIsPopUpOpen] = useState(false);
 
   const [users, setUsers] = useState(userData);
   // role dropdown
-  const [isPopUpRole, setIsPopUpRole] = useState("Select Role");
+  // const [isPopUpRole, setIsPopUpRole] = useState("Select Role");
   const [popUpDropdownRoleOpen, setpopUpDropdownRoleOpen] = useState(false);
   const popUpRole = ["Admin", "Editor", "Viewer"];
   const popUpRoleRef = useRef(null);
   useClickOutside(popUpRoleRef, () => setpopUpDropdownRoleOpen(false));
   // status dropdown
-  const [isPopUpStatus, setIsPopUpStatus] = useState("Select Status");
+  // const [isPopUpStatus, setIsPopUpStatus] = useState("Select Status");
   const [popUpDropdownStatusOpen, setpopUpDropdownStatusOpen] = useState(false);
   const popUpStatus = ["Active", "Inactive"];
   const popUpStatusRef = useRef(null);
@@ -73,21 +139,42 @@ function Users() {
   useEffect(() => {
     setCurrentPage(1);
   }, [filterRole]);
-
-  const handleToOpenPopup = () => {
-    setPopupMode("Add");
-    setSelectedUser(null);
+  // open add user popup
+  const handleOpenAddPopup = () => {
+    setFormData({
+      ...initialFormData,
+      id: users.length + 1,
+    });
+    setSubmitted(false);
     setIsPopUpOpen(true);
   };
-
-  const handleToEditUser = (user) => {
+  // open edit user popup
+  const handleToEditPopup = (user) => {
     setPopupMode("Edit");
-    setSelectedUser(user);
-    setIsPopUpRole(user.role);
-    setIsPopUpStatus(user.status);
+    setFormData({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+    });
     setIsPopUpOpen(true);
   };
-
+  // add user
+  const handleAddUser = (newUser) => {
+    setUsers((prev) => [...prev, newUser]);
+    toast.success("User added successfully!");
+    setIsPopUpOpen(false);
+  };
+  // edit user
+  const handleEditUser = (updatedUsers) => {
+    setUsers((prev) =>
+      prev.map((user) => (user.id === updatedUsers.id ? updatedUsers : user))
+    );
+    toast.success("User updated successfully!");
+    setIsPopUpOpen(false);
+  };
+  // delete user
   const handleDeleteUser = (userId) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this user?"
@@ -97,11 +184,11 @@ function Users() {
     setUsers(updatedUsers);
     toast.success(`User with ID ${userId} has been deleted.`);
   };
-
+  //close popup
   const handleClosePopup = () => {
     setIsPopUpOpen(false);
-    setIsPopUpRole("Select Role");
-    setIsPopUpStatus("Select Status");
+    setFormData(initialFormData);
+    setSubmitted(false);
     setpopUpDropdownRoleOpen(false);
     setpopUpDropdownStatusOpen(false);
   };
@@ -116,112 +203,10 @@ function Users() {
         <Button
           showIcon={true}
           content="Add User"
-          onClick={handleToOpenPopup}
+          onClick={handleOpenAddPopup}
         />
       </div>
-      <PopUp
-        isOpen={isPopUpOpen}
-        title={popupMode === "Add" ? "Add New User" : "Edit User"}
-        des={
-          popupMode === "Add"
-            ? "Enter the information to create a new user account in the system."
-            : "Update the information for the selected user account."
-        }
-        confirmText={popupMode === "Add" ? "Create User" : "Save Changes"}
-        onConfirm={() => {
-          if (popupMode === "Add") {
-            toast.success("New user has been created.");
-          } else {
-            toast.info("User information has been updated.");
-          }
-          handleClosePopup();
-        }}
-        onClose={handleClosePopup}
-      >
-        <div className={popUpContent}>
-          <div className={spaceY2}>
-            <label>Full name</label>
-            <Input
-              placeholder="Enter full name"
-              type="text"
-              defaultValue={selectedUser?.name}
-            />
-          </div>
-          <div className={spaceY2}>
-            <label>Email</label>
-            <Input
-              placeholder="Enter email"
-              type="email"
-              defaultValue={selectedUser?.email}
-            />
-          </div>
-          <div className={spaceY2}>
-            <label>Role</label>
-            <div
-              className={dropdown}
-              onClick={() => setpopUpDropdownRoleOpen(!popUpDropdownRoleOpen)}
-              ref={popUpRoleRef}
-            >
-              <Button
-                styles={{ width: "100%" }}
-                content={isPopUpRole}
-                isPrimary={false}
-              />
-              <span>
-                <RiArrowDropDownLine />
-              </span>
-              {popUpDropdownRoleOpen && (
-                <div className={options}>
-                  {popUpRole.map((role) => (
-                    <div
-                      key={role}
-                      onClick={() => (
-                        setIsPopUpRole(role), setpopUpDropdownRoleOpen(false)
-                      )}
-                    >
-                      {role}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className={spaceY2}>
-            <label>Status</label>
-            <div
-              className={dropdown}
-              onClick={() =>
-                setpopUpDropdownStatusOpen(!popUpDropdownStatusOpen)
-              }
-              ref={popUpStatusRef}
-            >
-              <Button
-                styles={{ width: "100%" }}
-                content={isPopUpStatus}
-                isPrimary={false}
-              />
-              <span>
-                <RiArrowDropDownLine />
-              </span>
-              {popUpDropdownStatusOpen && (
-                <div className={options}>
-                  {popUpStatus.map((status) => (
-                    <div
-                      key={status}
-                      onClick={() => (
-                        setIsPopUpStatus(status),
-                        setpopUpDropdownStatusOpen(false)
-                      )}
-                    >
-                      {status}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </PopUp>
+
       <Card>
         <CardHeader className={headerCard}>
           <h4>Users</h4>
@@ -296,7 +281,7 @@ function Users() {
                       onClose={() => setIsOpenId(null)}
                       onDelete={() => handleDeleteUser(user.id)}
                       onEdit={() => {
-                        handleToEditUser(user);
+                        handleToEditPopup(user);
                       }}
                     />
                   </td>
@@ -311,6 +296,133 @@ function Users() {
             onPageChange={setCurrentPage}
           />
         </CardContent>
+        <PopUp
+          isOpen={isPopUpOpen}
+          title={popupMode === "Add" ? "Add New User" : "Edit User"}
+          des={
+            popupMode === "Add"
+              ? "Enter the information to create a new user account in the system."
+              : "Update the information for the selected user account."
+          }
+          confirmText={popupMode === "Add" ? "Create User" : "Save Changes"}
+          onConfirm={() => {
+            setSubmitted(true);
+            if (!validateForm()) return;
+
+            const newUser = {
+              id: popupMode === "Add" ? users.length + 1 : formData.id,
+              name: formData.name,
+              email: formData.email,
+              role: formData.role,
+              status: formData.status,
+            };
+            if (popupMode === "Add") {
+              handleAddUser(newUser);
+            } else {
+              handleEditUser(newUser);
+            }
+            handleClosePopup();
+          }}
+          onClose={handleClosePopup}
+        >
+          <div className={popUpContent}>
+            <div className={spaceY2}>
+              <label>
+                Full name <span className={getRequiredClass("name")}>*</span>
+              </label>
+              <Input
+                placeholder="Enter full name"
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className={spaceY2}>
+              <label>
+                Email <span className={getRequiredClass("email")}>*</span>
+              </label>
+              <Input
+                placeholder="Enter email"
+                type="email"
+                value={formData.email}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className={spaceY2}>
+              <label>
+                Role <span className={getRequiredClass("role")}>*</span>
+              </label>
+              <div
+                className={dropdown}
+                onClick={() => setpopUpDropdownRoleOpen(!popUpDropdownRoleOpen)}
+                ref={popUpRoleRef}
+              >
+                <Button
+                  styles={{ width: "100%" }}
+                  content={formData.role}
+                  isPrimary={false}
+                />
+                <span>
+                  <RiArrowDropDownLine />
+                </span>
+                {popUpDropdownRoleOpen && (
+                  <div className={options}>
+                    {popUpRole.map((role) => (
+                      <div
+                        key={role}
+                        onClick={() => (
+                          setFormData({ ...formData, role }),
+                          // setIsPopUpRole(role),
+                          setpopUpDropdownRoleOpen(false)
+                        )}
+                      >
+                        {role}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className={spaceY2}>
+              <label>
+                Status <span className={getRequiredClass("status")}>*</span>
+              </label>
+              <div
+                className={dropdown}
+                onClick={() =>
+                  setpopUpDropdownStatusOpen(!popUpDropdownStatusOpen)
+                }
+                ref={popUpStatusRef}
+              >
+                <Button
+                  styles={{ width: "100%" }}
+                  content={formData.status}
+                  isPrimary={false}
+                />
+                <span>
+                  <RiArrowDropDownLine />
+                </span>
+                {popUpDropdownStatusOpen && (
+                  <div className={options}>
+                    {popUpStatus.map((status) => (
+                      <div
+                        key={status}
+                        onClick={() => (
+                          setFormData({ ...formData, status }),
+                          // setIsPopUpStatus(status),
+                          setpopUpDropdownStatusOpen(false)
+                        )}
+                      >
+                        {status}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </PopUp>
       </Card>
     </div>
   );
