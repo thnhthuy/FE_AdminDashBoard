@@ -21,6 +21,7 @@ function Input({ showIcon = false, icon = <CiSearch />, ...props }) {
           [hasIcon]: showIcon,
         })}
         {...props}
+        value={props.value ?? ""}
       />
     </div>
   );

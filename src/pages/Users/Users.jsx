@@ -8,10 +8,18 @@ import { RiArrowDropDownLine } from "react-icons/ri";
 import { useState, useEffect, useRef, useContext } from "react";
 import Pagination from "@/components/ui/Pagination/Pagination";
 import ActionMenu from "@/components/ui/ActionMenu/ActionMenu";
-import { tableHeaders, userData } from "./constants";
 import PopUp from "@components/ui/PopUp/PopUp";
 import useClickOutside from "@hooks/useClickOutside";
 import { ToastContext } from "@/contexts/ToastContext";
+import { mockUserData, tableHeaders } from "./constants";
+import { CiFilter } from "react-icons/ci";
+import {
+  FaRegUser,
+  FaUserCheck,
+  FaUserPlus,
+  FaUserSlash,
+} from "react-icons/fa";
+import Information from "@components/ui/Information/Information";
 
 function Users() {
   const {
@@ -25,6 +33,10 @@ function Users() {
     table,
     popUpContent,
     spaceY2,
+    required,
+    containerInformation,
+    containerlstBtn,
+    lstBtn,
   } = styles;
 
   const { toast } = useContext(ToastContext);
@@ -37,160 +49,267 @@ function Users() {
     status: "Select Status",
   };
 
-  const [submitted, setSubmitted] = useState(false);
-  const getRequiredClass = (field) => {
-    return submitted && !formData[field] ? styles.required : "";
-  };
   const [formData, setFormData] = useState(initialFormData);
+  const [submitted, setSubmitted] = useState(false);
 
-  const [errors, setErrors] = useState({});
+  const getRequiredClass = (field) => {
+    return submitted && !formData[field] ? required : "";
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const formatString = (str) =>
+    str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+
+  // Convert API users to UI-friendly format
+  const convertUsers = (list) =>
+    list.map((u) => ({
+      id: u.id,
+      name: u.fullName,
+      email: u.email,
+      role: u.roles?.[0]?.name || "USER",
+      status: u.status,
+      img: u.avatar || "/default-avatar.png",
+      details: u,
+      actions: ["Edit", "View Details", "Delete"],
     }));
+
+  // MOCK SERVICE
+  const userService = {
+    getUsers: async () => {
+      // Lấy đúng mảng từ mock API
+      const res = mockUserData; // {status, message, data: { data: [...] }}
+      return convertUsers(res.data.data);
+    },
+
+    createUser: async (user) => {
+      return Promise.resolve(user);
+    },
+
+    updateUser: async (user) => {
+      return Promise.resolve(user);
+    },
+
+    deleteUser: async (id) => {
+      return Promise.resolve(id);
+    },
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    let firstToastShown = false;
-    if (!formData.name.trim()) {
-      newErrors.name = "User name is required";
-      if (!firstToastShown) {
-        toast.error(newErrors.name);
-        firstToastShown = true;
-      }
-    }
-    // if (!formData.email.trim()) {
-    //   newErrors.email = "Email is required";
-    //   if (!firstToastShown) {
-    //     toast.error(newErrors.email);
-    //     firstToastShown = true;
-    //   }
-    // }
-    if (formData.role === "Select Role") {
-      newErrors.role = "Role is required";
-      if (!firstToastShown) {
-        toast.error(newErrors.role);
-        firstToastShown = true;
-      }
-    }
-    if (formData.status === "Select Status") {
-      newErrors.status = "Status is required";
-      if (!firstToastShown) {
-        toast.error(newErrors.status);
-        firstToastShown = true;
-      }
-    }
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) {
-      const firstErrorKey = Object.keys(newErrors)[0];
-      const inputEl = document.querySelector(`input[name="${firstErrorKey}"]`);
-      if (inputEl) inputEl.focus();
-      return false;
-    }
+  const [users, setUsers] = useState([]);
 
-    return true;
-  };
+  const totalUsers = users.length;
+  const ActiveUsers = users.filter(
+    (u) => u.status.toLowerCase() === "active"
+  ).length;
+  const InactiveUsers = totalUsers - ActiveUsers;
 
-  const [isOpenId, setIsOpenId] = useState(null); //action Menu
+  const informations = [
+    {
+      title: "Total Accounts",
+      icon: <FaRegUser />,
+      value: totalUsers.toString(),
+    },
+    {
+      title: " Active Accounts ",
+      icon: <FaUserCheck />,
+      value: ActiveUsers.toString(),
+    },
+    {
+      title: " Inactive Accounts ",
+      icon: <FaUserSlash />,
+      value: InactiveUsers.toString(),
+    },
+  ];
 
+  const dataStatus = [
+    { status: "All" },
+    { status: "Active" },
+    { status: "Inactive" },
+  ];
+
+  useEffect(() => {
+    userService.getUsers().then((data) => setUsers(data));
+  }, []);
+
+  const [isOpenId, setIsOpenId] = useState(null);
   const [isPopUpOpen, setIsPopUpOpen] = useState(false);
 
-  const [users, setUsers] = useState(userData);
-  // role dropdown
-  // const [isPopUpRole, setIsPopUpRole] = useState("Select Role");
-  const [popUpDropdownRoleOpen, setpopUpDropdownRoleOpen] = useState(false);
-  const popUpRole = ["Admin", "Editor", "Viewer"];
+  // Dropdowns
+  const roleOptions = ["Admin", "User", "Order Staff", "Warehouse Staff"];
+  const statusOptions = ["Active", "Inactive"];
+
+  const [popUpDropdownRoleOpen, setPopUpDropdownRoleOpen] = useState(false);
+  const [popUpDropdownStatusOpen, setPopUpDropdownStatusOpen] = useState(false);
+
   const popUpRoleRef = useRef(null);
-  useClickOutside(popUpRoleRef, () => setpopUpDropdownRoleOpen(false));
-  // status dropdown
-  // const [isPopUpStatus, setIsPopUpStatus] = useState("Select Status");
-  const [popUpDropdownStatusOpen, setpopUpDropdownStatusOpen] = useState(false);
-  const popUpStatus = ["Active", "Inactive"];
   const popUpStatusRef = useRef(null);
-  useClickOutside(popUpStatusRef, () => setpopUpDropdownStatusOpen(false));
-  // filter dropdown
+
+  useClickOutside(popUpRoleRef, () => setPopUpDropdownRoleOpen(false));
+  useClickOutside(popUpStatusRef, () => setPopUpDropdownStatusOpen(false));
+
+  // Filter role
   const [open, setOpen] = useState(false);
   const [filterRole, setFilterRole] = useState("All");
-  const optionsRole = ["All", "Admin", "Editor", "Viewer"];
   const filterRef = useRef(null);
   useClickOutside(filterRef, () => setOpen(false));
-  // popup mode
-  const [popupMode, setPopupMode] = useState("Add");
-  const [selectedUser, setSelectedUser] = useState(null);
 
-  const filteredUsers =
-    filterRole === "All"
-      ? users
-      : users.filter(
-          (user) => user.role.toLowerCase() === filterRole.toLowerCase()
-        );
+  const [filterStatus, setFilterStatus] = useState("All");
 
+  const filteredUsers = users.filter((u) => {
+    const statusMatch =
+      filterStatus === "All"
+        ? true
+        : u.status.toLowerCase() === filterStatus.toLowerCase();
+    const roleMatch =
+      filterRole === "All"
+        ? true
+        : u.role.toLowerCase() === filterRole.toLowerCase();
+    return statusMatch && roleMatch;
+  });
+
+  // const filteredUsers =
+  //   filterRole === "All"
+  //     ? users
+  //     : users.filter((u) => u.role.toLowerCase() === filterRole.toLowerCase());
+
+  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
+  const currentUsers = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   useEffect(() => {
     setCurrentPage(1);
   }, [filterRole]);
-  // open add user popup
+
+  // CRUD functions
   const handleOpenAddPopup = () => {
-    setFormData({
-      ...initialFormData,
-      id: users.length + 1,
-    });
+    // setFormData({ ...initialFormData, id: users.length + 1 });
+    setFormData(initialFormData);
     setSubmitted(false);
     setIsPopUpOpen(true);
   };
-  // open edit user popup
+
   const handleToEditPopup = (user) => {
-    setPopupMode("Edit");
-    setFormData({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      status: user.status,
-    });
+    setFormData({ ...user });
     setIsPopUpOpen(true);
   };
-  // add user
+
   const handleAddUser = (newUser) => {
     setUsers((prev) => [...prev, newUser]);
     toast.success("User added successfully!");
-    setIsPopUpOpen(false);
   };
-  // edit user
-  const handleEditUser = (updatedUsers) => {
-    setUsers((prev) =>
-      prev.map((user) => (user.id === updatedUsers.id ? updatedUsers : user))
-    );
+
+  const handleEditUser = (updated) => {
+    setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
     toast.success("User updated successfully!");
-    setIsPopUpOpen(false);
   };
-  // delete user
-  const handleDeleteUser = (userId) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this user?"
-    );
-    if (!confirmed) return;
-    const updatedUsers = users.filter((user) => user.id !== userId);
-    setUsers(updatedUsers);
-    toast.success(`User with ID ${userId} has been deleted.`);
+
+  const handleDeleteUser = (id) => {
+    if (!window.confirm("Delete this user?")) return;
+    setUsers((prev) => prev.filter((u) => u.id !== id));
+    toast.success("User deleted!");
   };
-  //close popup
+
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedUserDetail, setSelectedUserDetail] = useState(null);
+
+  const handleViewDetails = (user) => {
+    setSelectedUserDetail(user.details); // Lấy data gốc đã lưu trong trường 'details'
+    setIsDetailsModalOpen(true);
+    setIsOpenId(null);
+  };
+
+  const handleCloseDetailsModal = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedUserDetail(null);
+  };
+
   const handleClosePopup = () => {
     setIsPopUpOpen(false);
     setFormData(initialFormData);
     setSubmitted(false);
-    setpopUpDropdownRoleOpen(false);
-    setpopUpDropdownStatusOpen(false);
+  };
+
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      toast.error("Name is required");
+      return false;
+    }
+    if (!formData.email.trim()) {
+      toast.error("Email is required");
+      return false;
+    }
+    if (formData.role === "Select Role") {
+      toast.error("Role is required");
+      return false;
+    }
+    if (formData.status === "Select Status") {
+      toast.error("Status is required");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = () => {
+    setSubmitted(true);
+    if (!validateForm()) return;
+
+    const isAdding = !formData.id;
+    const newId = isAdding ? users.length + 1 : formData.id;
+
+    const baseUser = {
+      id: newId,
+      name: formData.name,
+      email: formData.email,
+      role: formData.role,
+      status: formData.status,
+      img: formData.img || "/default-avatar.png",
+      actions: ["Edit", "View Details", "Delete"],
+    };
+
+    // --- Logic Chuẩn bị Dữ liệu chi tiết (details) ---
+    let userDetails = users.find((u) => u.id === newId)?.details;
+
+    if (isAdding) {
+      // Thiết lập các trường chi tiết mặc định khi thêm mới
+      userDetails = {
+        id: newId,
+        fullName: formData.name,
+        email: formData.email,
+        roles: [{ name: formData.role.toUpperCase() }], // Lưu vai trò dưới dạng API
+        status: formData.status.toUpperCase(),
+        avatar: formData.img || "/default-avatar.png",
+        phone: null,
+        totalSpent: 0,
+        userRankResponse: null,
+        addressResponses: [],
+      };
+    } else {
+      // Cập nhật các trường cơ bản khi chỉnh sửa
+      userDetails = {
+        ...userDetails, // Giữ lại các trường chi tiết (như addresses, phone, dob...)
+        fullName: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        roles: [{ name: formData.role.toUpperCase() }],
+        status: formData.status.toUpperCase(),
+      };
+    }
+    // --- Kết thúc Logic Chuẩn bị Dữ liệu chi tiết ---
+
+    const user = { ...baseUser, details: userDetails };
+    console.log("user: ", user);
+
+    isAdding ? handleAddUser(user) : handleEditUser(user);
+    handleClosePopup();
   };
 
   return (
@@ -201,41 +320,70 @@ function Users() {
           <p>Manage user accounts, roles, and permissions.</p>
         </div>
         <Button
-          showIcon={true}
+          icon={
+            <FaUserPlus size={22} color="white" style={{ marginRight: 8 }} />
+          }
           content="Add User"
+          showIcon
           onClick={handleOpenAddPopup}
         />
+      </div>
+
+      <div className={containerInformation}>
+        {informations.map((info) => (
+          <Information
+            title={info.title}
+            icon={info.icon}
+            content={info.value}
+          />
+        ))}
+      </div>
+
+      <div className={containerlstBtn}>
+        <div className={lstBtn}>
+          {dataStatus.map((btn) => (
+            <Button
+              content={btn.status}
+              isPrimary={false}
+              btnActive={filterStatus === btn.status}
+              onClick={() => setFilterStatus(btn.status)}
+            />
+          ))}
+        </div>
       </div>
 
       <Card>
         <CardHeader className={headerCard}>
           <h4>Users</h4>
-          <p>A list of all users in your organization.</p>
+          <p>A list of all users in the system.</p>
         </CardHeader>
 
+        {/* FILTER + SEARCH */}
         <div className={findContainer}>
-          <Input showIcon={true} placeholder="Search users..." />
+          <Input showIcon placeholder="Search users..." />
+
           <div
             className={dropdown}
-            onClick={() => setOpen(!open)}
             ref={filterRef}
+            onClick={() => setOpen(!open)}
           >
-            <Button content={filterRole} isPrimary={false} />
-            <span>
-              <RiArrowDropDownLine />
-            </span>
+            <Button
+              icon={<CiFilter size={22} color="black" fontWeight={600} />}
+              content={filterRole}
+              isPrimary={false}
+            />
 
             {open && (
               <div className={options}>
-                {optionsRole.map((option) => (
+                {["All", ...roleOptions].map((role) => (
                   <div
-                    key={option}
+                    key={role}
                     onClick={() => {
-                      setFilterRole(option);
+                      setFilterRole(formatString(role));
                       setOpen(false);
                     }}
                   >
-                    {option}
+                    {formatString(role)}
                   </div>
                 ))}
               </div>
@@ -247,28 +395,30 @@ function Users() {
           <table className={table}>
             <thead>
               <tr>
-                {tableHeaders.map((item) => (
-                  <th key={item}>{item.toUpperCase()}</th>
+                {tableHeaders.map((header) => (
+                  <th key={header}>{header}</th>
                 ))}
               </tr>
             </thead>
+
             <tbody>
               {currentUsers.map((user) => (
                 <tr key={user.id}>
                   <td>{user.id}</td>
-                  <td
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "flex-start",
-                      gap: "8px",
-                    }}
-                  >
-                    <img src={user.img} alt="" width="35" />
-                    <span>{user.name}</span>
+
+                  <td style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <img
+                      src={user.img}
+                      width="35"
+                      style={{ borderRadius: "50%" }}
+                    />
+                    {user.name}
                   </td>
+
+                  <td>{user.email}</td>
                   <td>{user.role}</td>
                   <td>{user.status}</td>
+
                   <td>
                     <ActionMenu
                       isOpen={isOpenId === user.id}
@@ -278,11 +428,12 @@ function Users() {
                         )
                       }
                       actions={user.actions}
-                      onClose={() => setIsOpenId(null)}
-                      onDelete={() => handleDeleteUser(user.id)}
-                      onEdit={() => {
-                        handleToEditPopup(user);
+                      onEdit={() => handleToEditPopup(user)}
+                      onView={() => {
+                        handleViewDetails(user);
                       }}
+                      onDelete={() => handleDeleteUser(user.id)}
+                      onClose={() => setIsOpenId(null)}
                     />
                   </td>
                 </tr>
@@ -296,131 +447,242 @@ function Users() {
             onPageChange={setCurrentPage}
           />
         </CardContent>
+
+        {/* POPUP */}
         <PopUp
           isOpen={isPopUpOpen}
-          title={popupMode === "Add" ? "Add New User" : "Edit User"}
-          des={
-            popupMode === "Add"
-              ? "Enter the information to create a new user account in the system."
-              : "Update the information for the selected user account."
-          }
-          confirmText={popupMode === "Add" ? "Create User" : "Save Changes"}
-          onConfirm={() => {
-            setSubmitted(true);
-            if (!validateForm()) return;
-
-            const newUser = {
-              id: popupMode === "Add" ? users.length + 1 : formData.id,
-              name: formData.name,
-              email: formData.email,
-              role: formData.role,
-              status: formData.status,
-            };
-            if (popupMode === "Add") {
-              handleAddUser(newUser);
-            } else {
-              handleEditUser(newUser);
-            }
-            handleClosePopup();
-          }}
+          title={formData.id ? "Edit User" : "Add User"}
+          confirmText={formData.id ? "Save" : "Create"}
           onClose={handleClosePopup}
+          onConfirm={handleSubmit}
+          // onConfirm={() => {
+          //   setSubmitted(true);
+          //   if (!validateForm()) return;
+          //   const isAdding = !formData.id;
+          //   const newId = isAdding ? users.length + 1 : formData.id;
+          //   // const user = {
+          //   //   id: formData.id || users.length + 1,
+          //   //   name: formData.name,
+          //   //   email: formData.email,
+          //   //   role: formData.role,
+          //   //   status: formData.status,
+          //   //   img: formData.img || "/default-avatar.png",
+          //   //   actions: ["Edit", "View Details", "Delete"],
+          //   // };
+          //   const baseUser = {
+          //     id: newId,
+          //     name: formData.name,
+          //     email: formData.email,
+          //     role: formData.role,
+          //     status: formData.status,
+          //     img: formData.img || "/default-avatar.png",
+          //     actions: ["Edit", "View Details", "Delete"],
+          //   };
+
+          //   const userDetails = isAdding
+          //     ? {
+          //         // Thiết lập các trường chi tiết mặc định khi thêm mới
+          //         id: newId,
+          //         fullName: formData.name,
+          //         email: formData.email,
+          //         roles: [{ name: formData.role }],
+          //         status: formData.status.toUpperCase(),
+          //         avatar: formData.img || "/default-avatar.png",
+          //         phone: null,
+          //         totalSpent: 0,
+          //         userRankResponse: null,
+          //         addressResponses: [],
+          //       }
+          //     : users.find((u) => u.id === newId)?.details;
+
+          //   const user = { ...baseUser, details: userDetails };
+
+          //   isAdding ? handleAddUser(user) : handleEditUser(user);
+          //   handleClosePopup();
+
+          //   // formData.id ? handleEditUser(user) : handleAddUser(user);
+          //   // handleClosePopup();
+          // }}
         >
           <div className={popUpContent}>
+            {/* NAME */}
             <div className={spaceY2}>
               <label>
                 Full name <span className={getRequiredClass("name")}>*</span>
               </label>
               <Input
-                placeholder="Enter full name"
-                type="text"
                 name="name"
+                placeholder="Enter name"
+                type="text"
                 value={formData.name}
                 onChange={handleInputChange}
               />
             </div>
+
+            {/* EMAIL */}
             <div className={spaceY2}>
               <label>
                 Email <span className={getRequiredClass("email")}>*</span>
               </label>
               <Input
+                name="email"
                 placeholder="Enter email"
                 type="email"
                 value={formData.email}
                 onChange={handleInputChange}
               />
             </div>
+            {/* {Phone numeber} */}
+            <div className={spaceY2}>
+              <label>
+                Phone Number{" "}
+                <span className={getRequiredClass("phone")}>*</span>
+              </label>
+              <Input
+                name="phone"
+                placeholder="Enter phone number"
+                type="text"
+                value={formData.phone}
+                onChange={handleInputChange}
+              />
+            </div>
+            {/* ROLE */}
             <div className={spaceY2}>
               <label>
                 Role <span className={getRequiredClass("role")}>*</span>
               </label>
+
               <div
                 className={dropdown}
-                onClick={() => setpopUpDropdownRoleOpen(!popUpDropdownRoleOpen)}
                 ref={popUpRoleRef}
+                onClick={() => setPopUpDropdownRoleOpen(!popUpDropdownRoleOpen)}
               >
-                <Button
-                  styles={{ width: "100%" }}
-                  content={formData.role}
-                  isPrimary={false}
-                />
+                <Button content={formData.role} isPrimary={false} />
                 <span>
                   <RiArrowDropDownLine />
                 </span>
                 {popUpDropdownRoleOpen && (
                   <div className={options}>
-                    {popUpRole.map((role) => (
+                    {roleOptions.map((r) => (
                       <div
-                        key={role}
-                        onClick={() => (
-                          setFormData({ ...formData, role }),
-                          // setIsPopUpRole(role),
-                          setpopUpDropdownRoleOpen(false)
-                        )}
+                        key={r}
+                        onClick={() => {
+                          setFormData({ ...formData, role: r });
+                          setPopUpDropdownRoleOpen(false);
+                        }}
                       >
-                        {role}
+                        {r}
                       </div>
                     ))}
                   </div>
                 )}
               </div>
             </div>
+
+            {/* STATUS */}
             <div className={spaceY2}>
               <label>
                 Status <span className={getRequiredClass("status")}>*</span>
               </label>
+
               <div
                 className={dropdown}
-                onClick={() =>
-                  setpopUpDropdownStatusOpen(!popUpDropdownStatusOpen)
-                }
                 ref={popUpStatusRef}
+                onClick={() =>
+                  setPopUpDropdownStatusOpen(!popUpDropdownStatusOpen)
+                }
               >
-                <Button
-                  styles={{ width: "100%" }}
-                  content={formData.status}
-                  isPrimary={false}
-                />
+                <Button content={formData.status} isPrimary={false} />
                 <span>
                   <RiArrowDropDownLine />
                 </span>
                 {popUpDropdownStatusOpen && (
                   <div className={options}>
-                    {popUpStatus.map((status) => (
+                    {statusOptions.map((s) => (
                       <div
-                        key={status}
-                        onClick={() => (
-                          setFormData({ ...formData, status }),
-                          // setIsPopUpStatus(status),
-                          setpopUpDropdownStatusOpen(false)
-                        )}
+                        key={s}
+                        onClick={() => {
+                          setFormData({ ...formData, status: s });
+                          setPopUpDropdownStatusOpen(false);
+                        }}
                       >
-                        {status}
+                        {s}
                       </div>
                     ))}
                   </div>
                 )}
               </div>
             </div>
+          </div>
+        </PopUp>
+
+        {/* POPUP XEM CHI TIẾT */}
+        <PopUp
+          isOpen={isDetailsModalOpen}
+          title="User Details"
+          confirmText="Close" // Đổi nút Confirm thành Close
+          onClose={handleCloseDetailsModal}
+          onConfirm={handleCloseDetailsModal} // Xử lý đóng modal khi click Confirm (Close)
+          hideCancelButton // Ẩn nút Cancel
+        >
+          <div className={popUpContent}>
+            {selectedUserDetail ? (
+              <>
+                <div className={spaceY2}>
+                  <p>
+                    **Avatar:**{" "}
+                    {selectedUserDetail.avatar && (
+                      <img
+                        src={selectedUserDetail.avatar}
+                        alt="Avatar"
+                        width="50"
+                        style={{ borderRadius: "50%" }}
+                      />
+                    )}
+                  </p>
+                </div>
+                <div className={spaceY2}>
+                  <p>**Full Name:** {selectedUserDetail.fullName}</p>
+                </div>
+                <div className={spaceY2}>
+                  <p>**Email:** {selectedUserDetail.email}</p>
+                </div>
+                <div className={spaceY2}>
+                  <p>**Phone:** {selectedUserDetail.phone || "N/A"}</p>
+                </div>
+                <div className={spaceY2}>
+                  <p>**Gender:** {selectedUserDetail.gender || "N/A"}</p>
+                </div>
+                <div className={spaceY2}>
+                  <p>
+                    **Date of Birth:** {selectedUserDetail.dateOfBirth || "N/A"}
+                  </p>
+                </div>
+                <div className={spaceY2}>
+                  <p>**Status:** {selectedUserDetail.status}</p>
+                </div>
+                <div className={spaceY2}>
+                  <p>
+                    **Roles:**{" "}
+                    {selectedUserDetail.roles.map((r) => r.name).join(", ")}
+                  </p>
+                </div>
+                <div className={spaceY2}>
+                  <p>
+                    **Total Spent:**{" "}
+                    {selectedUserDetail.totalSpent?.toLocaleString() || "0"}
+                  </p>
+                </div>
+                <div className={spaceY2}>
+                  <p>
+                    **User Rank:**{" "}
+                    {selectedUserDetail.userRankResponse?.name || "N/A"}
+                  </p>
+                </div>
+              </>
+            ) : (
+              <p>Loading user details...</p>
+            )}
           </div>
         </PopUp>
       </Card>

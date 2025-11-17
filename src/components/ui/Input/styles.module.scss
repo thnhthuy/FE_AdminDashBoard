@@ -2,6 +2,10 @@
   position: relative;
   display: flex;
   width: 100%;
+  input {
+    // margin-top: 5px;
+    align-content: center;
+  }
 
   .iconSearch {
     position: absolute;

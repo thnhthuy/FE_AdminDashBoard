@@ -3,11 +3,13 @@ import styles from "./styles.module.scss";
 import classNames from "classnames";
 function Button({
   content,
-  showIcon = false,
+  // showIcon = false,
+  icon = null,
   isPrimary = true,
   btnActive = false,
   onClick,
   onChange,
+  ...props
 }) {
   const { btn, appear, hidden, primaryBtn, secondaryBtn, btnItemActive } =
     styles;
@@ -20,10 +22,12 @@ function Button({
         [secondaryBtn]: !isPrimary,
         [btnItemActive]: btnActive,
       })}
+      {...props}
     >
-      <div className={showIcon ? appear : hidden}>
+      {/* <div className={showIcon ? appear : hidden}>
         <HiMiniPlus />
-      </div>
+      </div> */}
+      {icon && <div className={appear}>{icon}</div>}
       <div>{content}</div>
     </button>
   );

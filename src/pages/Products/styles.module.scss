@@ -4,10 +4,16 @@
 .container {
   display: flex;
   flex-direction: column;
+  padding: 20px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+
   .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+
     .title {
       h2 {
         margin: 0 0 10px 0;
@@ -38,11 +44,13 @@
   border-spacing: 0;
   overflow: visible;
   text-align: center;
+
   th,
   td {
     height: 40px;
     border-bottom: 0.5px solid #ccc;
   }
+
   td {
     img {
       max-width: 50px;
@@ -53,16 +61,19 @@
 
   tr {
     align-items: center;
+
     &:hover {
       background-color: #efefef;
     }
   }
 
   button {
+    margin: 0 2px;
     background-color: transparent;
     border: none;
     color: #111;
-    padding: 5px;
+    padding: 4px;
+
     &:hover {
       background-color: #ddd;
     }
@@ -72,6 +83,7 @@
 .containerlstBtn {
   display: flex;
   margin-top: 10px;
+
   .lstBtn {
     background-color: #e1e1e1;
     display: flex;
@@ -88,20 +100,23 @@
   align-items: center;
   gap: 10px;
 }
+
 .dropdown {
   position: relative;
   display: flex;
   gap: 10px;
-  span {
-    position: absolute;
-    font-size: 26px;
-    opacity: 0.5;
-    color: #777;
-    font-weight: 400;
-    top: 60%;
-    right: 7%;
-    transform: translateY(-50%);
-  }
+
+  // span {
+  //   position: absolute;
+  //   font-size: 26px;
+  //   opacity: 0.5;
+  //   color: #777;
+  //   font-weight: 400;
+  //   top: 60%;
+  //   right: 7%;
+  //   transform: translateY(-50%);
+  // }
+
   button {
     width: 160px;
     height: 40px;
@@ -130,89 +145,143 @@
     padding-top: 8px;
     border: none;
     outline: none;
-
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 
-    div {
-      padding: 7px 10px;
-      margin: 5px;
-      border-radius: 5px;
-      &:hover {
-        background-color: #ccc;
-        cursor: default;
-      }
-    }
+    // div {
+    //   padding: 7px 10px;
+    //   margin: 5px;
+    //   border-radius: 5px;
+
+    //   &:hover {
+    //     background-color: #ccc;
+    //     cursor: default;
+    //   }
+    // }
   }
 }
 
-//popUp styles
-.popUpcontent {
-  display: grid;
-  gap: 1rem;
+.dropdownCategory {
+  position: relative;
+  display: flex;
+  gap: 10px;
 
-  .gridCols2 {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
+  .arrowIcon {
+    span {
+      position: absolute;
+      font-size: 26px;
+      opacity: 0.5;
+      color: #777;
+      font-weight: 400;
+      top: 60%;
+      right: 7%;
+      transform: translateY(-50%);
+    }
   }
-  .spaceY2 {
-    position: relative;
+
+  .optionCategory {
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    .options,
-    button {
-      width: 100%;
-    }
-    .uploadBtn {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-
-      cursor: pointer;
-      color: #555;
-      input {
-        background-color: rgba(241, 241, 241, 0.966);
-        width: 100%;
-        border: none;
-        border-radius: 7px;
-        outline: none;
-        height: 40px;
-        box-sizing: border-box;
-        padding: 10px 0 10px 10px;
-
-        align-items: center;
-        flex: 1;
-      }
-      .stylesBtnUpload {
-        position: relative;
-        span {
-          position: absolute;
-          font-size: 26px;
-          opacity: 0.5;
-          color: #777;
-          font-weight: 400;
-          top: 60%;
-          left: 7%;
-          transform: translateY(-50%);
-        }
-        button {
-          height: 40px;
-          padding-left: 35px;
-          background-color: #fff;
-          color: #111;
-          border-radius: 7px;
-          &:hover {
-            background-color: #ededed;
-          }
-        }
-      }
-    }
+    position: absolute;
+    z-index: 1001;
+    top: 120%;
+    border-radius: 7px;
+    background-color: #fff;
+    padding-top: 8px;
+    border: none;
+    outline: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
 }
-// img preview styles
+
+//pop up styles
+.popUpContent {
+  padding: 10px;
+
+  input {
+    margin-top: 5px;
+  }
+}
+
+.section {
+  margin-top: 20px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.gridCols2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.spaceY2 {
+  margin-bottom: 10px;
+}
+
+.attributeBlock {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+.attributeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 10px;
+}
+
+.attributeNameWrapper {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+
+.attributeValueList {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+.attributeValueItem {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  align-items: center;
+}
+
+// Variant table styles
+.variantTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+
+  th,
+  td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+
+  .variantTableHeader {
+    background-color: #f8f9fa;
+  }
+}
+
+.inputInTable {
+  padding: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+// Image preview styles
 .preview {
-  margin-top: 10px;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
 
   img {
     max-width: 150px;
@@ -222,7 +291,8 @@
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   }
 }
-// information container styles
+
+// Information container
 .containerInformation {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -233,7 +303,251 @@
 .required {
   color: red;
   font-weight: 700;
-  // transform: scale(1.3);
-  // display: inline-block;
-  // transition: all 0.2s ease-in-out;
+}
+
+.categoryPicker {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  max-height: 250px;
+  overflow-y: auto;
+  margin-top: 5px;
+}
+
+.statusGreen {
+  color: #28a745;
+}
+
+.statusYellow {
+  color: #ffc107;
+}
+
+.statusRed {
+  color: #dc3545;
+}
+
+.description {
+  width: 100%;
+  margin-top: 15px;
+  label {
+    display: block;
+    font-weight: 600;
+  }
+  textarea {
+    width: 100%;
+
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-height: 100px;
+    padding: 10px;
+    font-size: 1rem;
+    color: #333;
+  }
+}
+
+// table responsive styles
+
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+
+    .header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+  }
+
+  .containerInformation {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .gridCols2 {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .findContainer {
+    flex-direction: column;
+    align-items: stretch;
+
+    > :global(.input-container),
+    .dropdown {
+      width: 100%;
+    }
+
+    .dropdown {
+      button {
+        width: 100%;
+      }
+
+      .options {
+        width: 100%;
+      }
+    }
+  }
+
+  .attributeHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+
+    .attributeNameWrapper {
+      margin-right: 0;
+    }
+  }
+
+  .table {
+    min-width: 700px;
+  }
+
+  .variantTable {
+    min-width: 600px;
+  }
+
+  input,
+  select,
+  button {
+    width: 100%;
+  }
+}
+
+// // mobile styles
+@media (max-width: 480px) {
+  .container {
+    padding: 10px;
+  }
+
+  .containerInformation {
+    grid-template-columns: 1fr;
+  }
+
+  .containerlstBtn {
+    .lstBtn {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding: 5px;
+      gap: 2px;
+    }
+  }
+
+  .popUpContent {
+    padding: 5px;
+  }
+
+  .attributeValueItem {
+    flex-direction: column;
+    align-items: stretch;
+
+    > :global(.input-container) {
+      width: 100%;
+    }
+  }
+
+  .preview {
+    gap: 8px;
+  }
+
+  .table,
+  .variantTable {
+    display: flex;
+    border: none;
+    min-width: unset;
+    overflow-x: unset;
+
+    th {
+      display: none;
+    }
+
+    tr {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    // td {
+    //   display: block;
+    //   justify-content: space-between;
+    //   border: none;
+    //   padding: 6px 0; /* Giữ padding dọc */
+    //   font-size: 0.9rem;
+    //   text-align: left;
+    //   line-height: 1.3; /* Thêm khoảng cách dòng */
+
+    //   /* HIỂN THỊ NHÃN CỘT DỰA TRÊN data-label */
+    //   &::before {
+    //     content: attr(data-label) ": ";
+    //     font-weight: bold;
+    //     margin-right: 5px;
+    //     display: inline-block;
+    //     color: #333;
+    //   }
+
+    //   /* Tinh chỉnh cột ID (cột 1) */
+    //   &:nth-child(1) {
+    //     /* Căn giữa ID trên cùng */
+    //     text-align: center;
+    //     padding-bottom: 10px;
+    //     border-bottom: 1px solid #eee;
+
+    //     &::before {
+    //       content: attr(data-label) ": ";
+    //     }
+    //   }
+
+    //   /* Tinh chỉnh cột Name (cột thứ 2) - FIX: Bố cục ảnh/tên */
+    //   &:nth-child(2) {
+    //     display: flex;
+    //     align-items: center;
+    //     justify-content: flex-start;
+    //     flex-wrap: nowrap; /* Bỏ wrap */
+    //     padding-top: 10px;
+
+    //     &::before {
+    //       content: attr(data-label) ": "; /* Nhãn Name */
+    //       display: block;
+    //       flex-basis: 100%;
+    //       margin-bottom: 5px;
+    //     }
+    //     img {
+    //       margin-right: 10px;
+    //     }
+    //     span {
+    //       /* Đảm bảo tên sản phẩm hiển thị đủ */
+    //       flex: 1;
+    //       word-break: break-word;
+    //     }
+    //   }
+
+    //   /* Tinh chỉnh cột Category (cột 3) - FIX: Bị lặp Category 25 */
+    //   /* Trong file Products.jsx, cột ID (1) và Category (3) đều đang lấy product.categoryId.
+    //      Tôi sẽ ẩn nhãn và giá trị của cột Category (cột thứ 3) trong CSS
+    //      để tránh bị lặp lại giá trị ID/Category. */
+    //   &:nth-child(3) {
+    //     display: none;
+    //   }
+
+    //   /* Tinh chỉnh cột Actions (cột cuối cùng) */
+    //   &:last-child {
+    //     display: flex;
+    //     justify-content: center;
+    //     padding-top: 10px;
+
+    //     &::before {
+    //       content: "";
+    //       display: none;
+    //     }
+    //   }
+
+    //   /* Áp dụng cho các cột dữ liệu còn lại */
+    //   &:not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)):not(
+    //       :last-child
+    //     ) {
+    //     word-break: break-word;
+    //   }
+    // }
+  }
 }

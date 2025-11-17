@@ -5,12 +5,13 @@
   align-items: center;
   font-size: 14px;
   font-weight: 400;
+  height: 40px;
   color: $white_color;
   background-color: #111;
   padding: 8px 12px;
   outline: none;
   border: 1px solid #e1e1e1;
-  @include radius_common(5px);
+  @include radius_common(10px);
   gap: 5px;
   cursor: pointer;
 

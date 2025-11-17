@@ -15,6 +15,7 @@ import { RiArrowDropDownLine } from "react-icons/ri";
 import PopUp from "@ui/PopUp/PopUp";
 import { ToastContext } from "@contexts/ToastContext";
 import useClickOutside from "@hooks/useClickOutside";
+import { HiMiniPlus } from "react-icons/hi2";
 function Order() {
   const {
     container,
@@ -38,6 +39,139 @@ function Order() {
   } = styles;
 
   const { toast } = useContext(ToastContext);
+
+  const initialFormData = {
+    id: "",
+    customer: "",
+    product: "",
+    category: "Select category",
+    size: "",
+    color: "",
+    address: "",
+    phone: "",
+    email: "",
+    paymentMethod: "Select method",
+    price: 0,
+    quantity: 0,
+    totalPrice: 0,
+    status: "",
+    date: Date,
+  };
+
+  const [submited, setSubmitted] = useState(false);
+  const getRequiredClass = (field) => {
+    return submited && !formData[field] ? styles.required : "";
+  };
+  const [formData, setFormData] = useState(initialFormData);
+  const [errors, setErrors] = useState({});
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    let firstToastShown = false;
+
+    if (!formData.customer.trim()) {
+      newErrors.customer = "Customer name is required";
+      if (!firstToastShown) {
+        toast.error(newErrors.customer);
+        firstToastShown = true;
+      }
+    }
+    if (!formData.phone) {
+      newErrors.phone = "Phone number is required";
+      if (!firstToastShown) {
+        toast.error(newErrors.phone);
+        firstToastShown = true;
+      }
+    }
+    if (formData.paymentMethod === "Select method") {
+      newErrors.paymentMethod = "Payment method is required";
+      if (!firstToastShown) {
+        toast.error(newErrors.paymentMethod);
+        firstToastShown = true;
+      }
+    }
+    if (!formData.address.trim()) {
+      newErrors.address = "Address is required";
+      if (!firstToastShown) {
+        toast.error(newErrors.address);
+        firstToastShown = true;
+      }
+    }
+    if (!formData.product.trim()) {
+      newErrors.product = "Product name is required";
+      if (!firstToastShown) {
+        toast.error(newErrors.product);
+        firstToastShown = true;
+      }
+    }
+    if (!formData.size.trim()) {
+      newErrors.size = "Size is required";
+      if (!firstToastShown) {
+        toast.error(newErrors.size);
+        firstToastShown = true;
+      }
+    }
+    if (!formData.color.trim()) {
+      newErrors.color = "Color is required";
+      if (!firstToastShown) {
+        toast.error(newErrors.color);
+        firstToastShown = true;
+      }
+    }
+    // if (formData.category === "Select category") {
+    //   newErrors.category = "Category is required";
+    //   if (!firstToastShown) {
+    //     toast.error(newErrors.category);
+    //     firstToastShown = true;
+    //   }
+    // }
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+      if (!firstToastShown) {
+        toast.error(newErrors.email);
+        firstToastShown = true;
+      }
+    }
+    if (!formData.price || formData.price <= 0) {
+      newErrors.price = "Price must be greater than 0";
+      if (!firstToastShown) {
+        toast.error(newErrors.price);
+        firstToastShown = true;
+      }
+    }
+    if (!formData.quantity || formData.quantity <= 0) {
+      newErrors.quantity = "Quantity must be greater than 0";
+      if (!firstToastShown) {
+        toast.error(newErrors.quantity);
+        firstToastShown = true;
+      }
+    }
+    if (!formData.totalPrice || formData.totalPrice <= 0) {
+      newErrors.totalPrice = "Total Price must be greater than 0";
+      if (!firstToastShown) {
+        toast.error(newErrors.totalPrice);
+        firstToastShown = true;
+      }
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
+      const firstErrorKey = Object.keys(newErrors)[0];
+      const inputEl = document.querySelector(`input[name="${firstErrorKey}"]`);
+      if (inputEl) {
+        inputEl.focus();
+      }
+      return false;
+    }
+    return true;
+  };
 
   const [orders, setOrders] = useState(orderData);
   const totalOrders = orders.length;
@@ -115,14 +249,25 @@ function Order() {
   const handletoOpenPopup = () => {
     setPopupMode("Add");
     setSelectedOrder(null);
+    setFormData({
+      ...initialFormData,
+      id: orders.length + 1,
+    });
+    setPopUpPaymentDropdown("Select method");
+    setSubmitted(false);
     setIsOpenPopup(true);
   };
   const handletoEditPopup = (order) => {
     setPopupMode("Edit");
-    setIsOpenPopup(true);
     setSelectedOrder(order);
     setPopUpPaymentDropdown(order.paymentMethod || "Select method");
-    console.log(order);
+    setFormData({
+      ...order,
+      price: parseFloat(order.price.replace(/[^0-9.]/g, "")) || 0,
+      quantity: order.quantity || 0,
+      totalPrice: parseFloat(order.totalPrice.replace(/[^0-9.]/g, "")) || 0,
+    });
+    setIsOpenPopup(true);
   };
 
   const handletoDeletePopup = (orderId) => {
@@ -138,6 +283,23 @@ function Order() {
     setIsOpenPopup(false);
     setPopUpPaymentDropdown("Select method");
     setPopupDropdownOpenMethod(false);
+    setFormData(initialFormData);
+    setSubmitted(false);
+    setErrors({});
+  };
+  //add order
+  const handleAddOrder = (newOrder) => {
+    setOrders((prev) => [...prev, newOrder]);
+    toast.success("New order added successfully");
+    setIsOpenPopup(false);
+  };
+  // edit order
+  const handleEditOrder = (updatedOrder) => {
+    setOrders((prev) =>
+      prev.map((order) => (order.id === updatedOrder.id ? updatedOrder : order))
+    );
+    toast.success("Order updated successfully");
+    setIsOpenPopup(false);
   };
 
   // Payment Method dropdown in PopUp
@@ -156,6 +318,14 @@ function Order() {
   const currentOrder = filteredOrders.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
+  //useEffect
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      totalPrice: prev.price * prev.quantity || 0,
+    }));
+  }, [formData.price, formData.quantity]);
+
   return (
     <div className={container}>
       <div className={header}>
@@ -164,7 +334,7 @@ function Order() {
           <p>Track and manage all customer fashion orders.</p>
         </div>
         <Button
-          showIcon={true}
+          icon={<HiMiniPlus />}
           content="Create new order"
           onClick={handletoOpenPopup}
         />
@@ -278,10 +448,30 @@ function Order() {
             confirmText={popupMode === "Add" ? "Add Order" : "Save Changes"}
             onClose={() => handletoClosePopup()}
             onConfirm={() => {
-              if (popupMode === "add") {
-                toast.success("Order added successfully!");
+              setSubmitted(true);
+              if (!validateForm()) return;
+
+              const newOrder = {
+                id: popupMode === "Add" ? orders.length + 1 : formData.id,
+                customer: formData.customer,
+                product: formData.product,
+                category: formData.category,
+                size: formData.size,
+                color: formData.color,
+                address: formData.address,
+                phone: formData.phone,
+                email: formData.email,
+                paymentMethod: formData.paymentMethod,
+                price: `$${Number(formData.price).toFixed(2)}`,
+                quantity: formData.quantity,
+                totalPrice: `$${Number(formData.totalPrice).toFixed(2)}`,
+                status: formData.status,
+                date: formData.date,
+              };
+              if (popupMode === "Add") {
+                handleAddOrder(newOrder);
               } else {
-                toast.info("Order updated successfully!");
+                handleEditOrder(newOrder);
               }
               setIsOpenPopup(false);
             }}
@@ -293,33 +483,52 @@ function Order() {
                 </div>
                 <div className={gridCols2}>
                   <div className={spaceY2}>
-                    <label>Customer Name</label>
+                    <label>
+                      Customer Name{" "}
+                      <span className={getRequiredClass("customer")}>*</span>
+                    </label>
                     <Input
                       type="text"
+                      name="customer"
                       placeholder="Enter customer name"
-                      defaultValue={selectedOrder?.customer}
+                      value={formData.customer || ""}
+                      onChange={handleInputChange}
                     />
                   </div>
                   <div className={spaceY2}>
-                    <label>Email</label>
+                    <label>
+                      Email <span className={getRequiredClass("email")}>*</span>
+                    </label>
                     <Input
                       type="email"
+                      name="email"
                       placeholder="Example@gmail.com"
-                      defaultValue={selectedOrder?.email}
+                      value={formData.email || ""}
+                      onChange={handleInputChange}
                     />
                   </div>
                 </div>
                 <div className={gridCols2}>
                   <div className={spaceY2}>
-                    <label>Phone number</label>
+                    <label>
+                      Phone number
+                      <span className={getRequiredClass("phone")}>*</span>
+                    </label>
                     <Input
                       type="text"
+                      name="phone"
                       placeholder="Enter phone number"
-                      defaultValue={selectedOrder?.phone}
+                      value={formData.phone || ""}
+                      onChange={handleInputChange}
                     />
                   </div>
                   <div className={spaceY2}>
-                    <label>Payment Method</label>
+                    <label>
+                      Payment Method{" "}
+                      <span className={getRequiredClass("paymentMethod")}>
+                        *
+                      </span>
+                    </label>
                     <div
                       className={dropdown}
                       onClick={() =>
@@ -341,6 +550,10 @@ function Order() {
                               key={option}
                               onClick={() => (
                                 setPopUpPaymentDropdown(option),
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  paymentMethod: option,
+                                })),
                                 setPopupDropdownOpenMethod(false)
                               )}
                             >
@@ -353,8 +566,18 @@ function Order() {
                   </div>
                 </div>
                 <div className={spaceY2}>
-                  <label> Address</label>
-                  <Input type="text" placeholder="Enter address" />
+                  <label>
+                    {" "}
+                    Address{" "}
+                    <span className={getRequiredClass("address")}>*</span>
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Enter address"
+                    value={formData.address || ""}
+                    onChange={handleInputChange}
+                    name="address"
+                  />
                 </div>
               </div>
               <div
@@ -368,48 +591,69 @@ function Order() {
                   <h4>Product Information</h4>
                 </div>
                 <div className={spaceY2}>
-                  <label>Product name</label>
+                  <label>
+                    Product name{" "}
+                    <span className={getRequiredClass("product")}>*</span>
+                  </label>
                   <Input
                     type="text"
                     placeholder="Enter product name"
-                    defaultValue={selectedOrder?.product}
+                    value={formData.product || ""}
+                    onChange={handleInputChange}
+                    name="product"
                   />
                 </div>
                 <div className={gridCols2}>
                   <div className={spaceY2}>
-                    <label>Size</label>
+                    <label>
+                      Size <span className={getRequiredClass("size")}>*</span>
+                    </label>
                     <Input
                       type="text"
                       placeholder="Ex: S, M,..."
-                      defaultValue={selectedOrder?.size}
+                      value={formData.size || ""}
+                      onChange={handleInputChange}
+                      name="size"
                     />
                   </div>
                   <div className={spaceY2}>
-                    <label>Color</label>
+                    <label>
+                      Color <span className={getRequiredClass("color")}>*</span>
+                    </label>
                     <Input
                       type="text"
                       placeholder="Ex: White, Black,..."
-                      defaultValue={selectedOrder?.color}
+                      value={formData.color || ""}
+                      onChange={handleInputChange}
+                      name="color"
                     />
                   </div>
                 </div>
                 <div className={gridCols2}>
                   <div className={spaceY2}>
-                    <label>Quantity</label>
+                    <label>
+                      Quantity{" "}
+                      <span className={getRequiredClass("quantity")}>*</span>
+                    </label>
                     <Input
                       type="number"
-                      min="1"
+                      min={1}
                       placeholder="1"
-                      defaultValue={selectedOrder?.quantity}
+                      value={formData.quantity || ""}
+                      onChange={handleInputChange}
+                      name="quantity"
                     />
                   </div>
                   <div className={spaceY2}>
-                    <label>Price</label>
+                    <label>
+                      Price <span className={getRequiredClass("price")}>*</span>
+                    </label>
                     <Input
                       type="number"
-                      min="0"
-                      placeholder="0"
-                      defaultValue={selectedOrder?.totalPrice}
+                      min={0}
+                      value={formData.price || ""}
+                      onChange={handleInputChange}
+                      name="price"
                     />
                   </div>
                 </div>

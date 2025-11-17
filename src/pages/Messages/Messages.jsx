@@ -1,16 +1,17 @@
 import styles from "./styles.module.scss";
 import Button from "@components/ui/Button/Button";
 import Information from "@components/ui/Information/Information";
-import { LuMessageCircleMore, LuSend } from "react-icons/lu";
-import { TiMessages } from "react-icons/ti";
 import Input from "@components/ui/Input/Input";
 import Card from "@components/Card/Card";
 import CardHeader from "@components/Card/CardHeader/CardHeader";
 import CardContent from "@components/Card/CardContent/CardContent";
 import classNames from "classnames";
 import { conversations, messages } from "./constant";
+import { LuMessageCircleMore, LuSend } from "react-icons/lu";
+import { TiMessages } from "react-icons/ti";
 import { GoLink } from "react-icons/go";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { HiMiniPlus } from "react-icons/hi2";
 
 function Messages() {
   const {
@@ -19,78 +20,117 @@ function Messages() {
     title,
     containerInformation,
     grid,
-    gridCols1,
     gridCols2,
     messageWrapper,
     customerName,
     messageHeader,
     messageTitle,
     lastMessage,
-    customerImg,
-    messageList,
-    messageDetail,
     messageInfo,
     messageRight,
     messageLeft,
     chat,
     bubble,
     messageTextarea,
-    p0,
-    p20,
     containerMessageTextarea,
     messageMeta,
     messageTime,
     unreadBadge,
     active,
+    avatarContainer,
+    avatarFallback,
+    avatarImg,
+    chatDetail,
+    p0,
+    p20,
   } = styles;
+
+  const [selectedConversation, setSelectedConversation] = useState(null);
+  const chatEndRef = useRef(null);
+
+  const totalConversations = conversations.length;
+  const newConversations = conversations.filter(
+    (msg) => msg.time >= "10:00" && msg.time <= "12:00"
+  ).length;
+
   const informations = [
     {
-      title: "Total Messages",
+      title: "Total Conversations",
       icon: <TiMessages />,
-      value: 120,
+      value: totalConversations,
     },
     {
-      title: "New Messages",
+      title: "New Conversations",
       icon: <LuMessageCircleMore />,
-      value: 15,
+      value: newConversations,
     },
   ];
 
-  const [selectedConversation, setSelectedConversation] = useState(null);
   const selectedConv = conversations.find(
     (conv) => conv.id === selectedConversation
   );
+
   const filteredMessages = messages.filter(
     (msg) => msg.conversationId === selectedConversation
   );
+
+  // useEffect(() => {
+  //   chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  // }, [filteredMessages, selectedConversation]);
+
+  const Avatar = ({ name, image, size = 40 }) => {
+    const firstLetter = name?.charAt(0)?.toUpperCase();
+    return (
+      <div className={avatarContainer} style={{ width: size, height: size }}>
+        {image ? (
+          <img
+            src={image}
+            alt={name}
+            className={avatarImg}
+            style={{ width: size, height: size }}
+          />
+        ) : (
+          <div className={avatarFallback} style={{ width: size, height: size }}>
+            {firstLetter}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className={container}>
+      {/* Header */}
       <div className={header}>
         <div className={title}>
           <h2>Message Center</h2>
           <p>Manage and respond to messages from customers.</p>
         </div>
-        <Button showIcon={true} content="New Message" />
+        <Button icon={<HiMiniPlus />} content="New Message" />
       </div>
+
+      {/* Thống kê */}
       <div className={containerInformation}>
         {informations.map((info) => (
           <Information
+            key={info.title}
             title={info.title}
             icon={info.icon}
             content={info.value}
           />
         ))}
       </div>
+
       <div className={classNames(grid, gridCols2)}>
         {/* Danh sách hội thoại */}
         <Card className={p0}>
           <CardHeader>
             <div className={messageHeader}>
-              <p>Message</p>
+              <p>Messages</p>
               <Input
                 type="text"
-                placeholder="Tìm kiếm hội thoại..."
-                showIcon={true}
+                placeholder="Search conversations..."
+                showIcon
               />
             </div>
           </CardHeader>
@@ -104,10 +144,14 @@ function Messages() {
                   })}
                   onClick={() => setSelectedConversation(conversation.id)}
                 >
-                  <div className={customerImg}>
-                    <img src="/src/assets/img/product1.jpg" alt="" />
-                  </div>
-                  <div className={messageDetail}>
+                  <Avatar
+                    name={conversation.customer}
+                    image={conversation.image}
+                  />
+                  <div
+                    className={styles.messageDetail}
+                    onClick={() => (conversation.unread = 0)}
+                  >
                     <div className={messageTitle}>
                       <p className={customerName}>{conversation.customer}</p>
                       <div className={messageMeta}>
@@ -131,11 +175,8 @@ function Messages() {
         <Card className={p0}>
           <CardHeader>
             <div className={messageHeader}>
-              {/* {conversations.map((conversation) => (
-                <p key={conversation.id}>{conversation.customer}</p>
-              ))} */}
               <p>
-                {selectedConv ? selectedConv.customer : "choose a conversation"}
+                {selectedConv ? selectedConv.customer : "Choose a conversation"}
               </p>
             </div>
           </CardHeader>
@@ -151,11 +192,14 @@ function Messages() {
                     })}
                   >
                     {msg.sender === "customer" && (
-                      <div className={customerImg}>
-                        <img src="/src/assets/img/product1.jpg" alt="" />
+                      <div className={chatDetail}>
+                        <Avatar
+                          name={selectedConv?.customer}
+                          image={selectedConv?.image}
+                          size={32}
+                        />
                       </div>
                     )}
-
                     <div className={bubble}>
                       <p>{msg.content}</p>
                       <span>{msg.time}</span>
@@ -167,8 +211,10 @@ function Messages() {
                   No messages in this conversation.
                 </p>
               )}
+              <div ref={chatEndRef} />
             </div>
           </CardContent>
+
           <div className={containerMessageTextarea}>
             <div className={messageTextarea}>
               <Button content={<GoLink />} />

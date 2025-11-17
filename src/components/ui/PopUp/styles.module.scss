@@ -1,5 +1,6 @@
 .popUpWrapper {
   position: relative;
+
   .overlay {
     position: fixed;
     top: 0;
@@ -21,6 +22,7 @@
     transform: translate(-50%, -50%);
     border-radius: 20px;
     animation: slideDown 0.4s ease-in-out forwards;
+    width: 800px;
     min-width: 400px;
     overflow-y: auto;
     max-height: 80vh;
@@ -95,5 +97,60 @@
     justify-content: flex-end;
     gap: 10px;
     margin-top: 40px;
+  }
+}
+
+/* ========================================== */
+/* ========== Responsive Design ============= */
+/* ========================================== */
+
+/* ---------- Tablet/Small Desktop (max-width: 820px) ---------- */
+@media (max-width: 820px) {
+  .popUpWrapper {
+    .popUpStyle {
+      width: 90%; /* Use 90% of screen width */
+      min-width: unset;
+      padding: 15px;
+    }
+
+    .popUpTitle {
+      .iconClose {
+        top: 15px;
+        right: 15px;
+      }
+    }
+
+    .popUpBottom {
+      margin-top: 30px;
+    }
+  }
+}
+
+/* ---------- Mobile (max-width: 480px) ---------- */
+@media (max-width: 480px) {
+  .popUpWrapper {
+    .popUpStyle {
+      border-radius: 10px;
+    }
+
+    @keyframes slideDown {
+      0% {
+        transform: translate(-50%, 100%);
+        opacity: 0;
+      }
+      100% {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+      }
+    }
+
+    .popUpTitle {
+      h4 {
+        font-size: 1.2em;
+      }
+      p {
+        font-size: 0.9em;
+      }
+    }
   }
 }
